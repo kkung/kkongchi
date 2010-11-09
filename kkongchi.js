@@ -4,20 +4,30 @@ var sys = require('sys');
 var ircServer = { 
   host: 'irc.ozinger.org',
   port: 6667,
-  channel: '#langdev'
+  channel: [ '#langdev','#hangulize' ]
 };
 
 var botConfig = {
   nick: '꽁치',
   user: 'kkongchi',
-  verbose: false
+  verbose: false 
 };
 
 var sock = net.createConnection(ircServer.port, ircServer.host);
 sock.setEncoding('utf8');
 
 packetHandlers = [
-  [ /^\:[a-zA-Z0-9_\.]+\s001/, function(socket) { writeln(socket,"JOIN "+ircServer.channel);} ],
+  [ /^\:[a-zA-Z0-9_\.]+\s001/, function(socket) { 
+
+      if ( typeof(ircServer.channel) == 'string' ) { 
+        writeln(socket,"JOIN "+ircServer.channel);
+      } else {
+        ircServer.channel.forEach(function(ch) {
+          writeln(socket,"JOIN "+ch);
+        });
+      }
+    } 
+  ],
   [ /^PING\s\:(.+)/, function(socket,line,m) { writeln(socket, "PONG :" + m[1]);} ],
   [ /^\:(.+)\sPRIVMSG\s(.+)\s\:(.+)/, function(socket,line,m) {
 
